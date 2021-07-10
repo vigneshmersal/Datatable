@@ -90,3 +90,80 @@ public function scopeOrderByLastInteractionDate($query)
     $query->orderBySubDesc(Interaction::select('created_at')->whereRaw('customers.id = interactions.customer_id')->latest());
 }
 ```
+
+## global scope
+```php
+protected static function booted()
+{
+    static::addGlobalScope(fn ($query) => $query->orderBy('name'));
+}
+```
+
+## relationship order
+### Hasone / belongsTo
+```php
+// join query - very fast
+$users = User::select('users.*')
+    ->join('companies', 'companies.user_id', '=', 'users.id')
+    ->orderBy('companies.name')
+    ->get();
+
+// subquery order - very slow
+$users = User::orderBy(
+    Company::select('name')->whereColumn('companies.user_id', 'users.id')
+)->get();
+```
+### Hasmany
+```php
+// subquery order - fast
+$users = User::orderByDesc(Login::select('created_at')
+    ->whereColumn('logins.user_id', 'users.id')
+    ->latest()->take(1)
+)->get();
+
+// join - fast
+$users = User::select('users.*')
+    ->join('logins', 'logins.user_id', '=', 'users.id')
+    ->groupBy('users.id')
+    ->orderByRaw('max(logins.created_at) desc') // using max is correct, 
+    // ->orderByDesc('logins.created_at') is this incorrect for group by order
+    ->get();
+
+// set index
+$table->index(['user_id', 'created_at']);
+```
+
+### Ordering by belongs-to-many relationships
+```php
+class Book extends Model
+{
+    public function user()
+    {
+        return $this->belongsToMany(User::class, 'checkouts')
+            ->using(Checkout::class)->withPivot('borrowed_date');
+    }
+}
+// subquery with pivot table
+$books = Books::orderByDesc(Checkout::select('borrowed_date')
+    ->whereColumn('book_id', 'books.id')
+    ->latest('borrowed_date')->limit(1)
+)->get();
+// (or) using closure
+$books = Books::orderByDesc(function ($query) {
+    $query->select('borrowed_date')
+        ->from('checkouts')
+        ->whereColumn('book_id', 'books.id')
+        ->latest('borrowed_date')
+        ->limit(1);
+})->get();
+
+// subquery with relation table - slow performance issue
+$books = Book::orderBy(User::select('name')
+    ->join('checkouts', 'checkouts.user_id', '=', 'users.id')
+    ->whereColumn('checkouts.book_id', 'books.id')
+    ->latest('checkouts.borrowed_date')
+    ->take(1)
+)->get();
+// or
+$table->foreignId('last_checkout_id')->nullable()->constrained('checkouts');
+```

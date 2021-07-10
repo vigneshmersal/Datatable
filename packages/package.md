@@ -52,3 +52,6 @@ https://github.com/spatie/laravel-web-tinker
 
 # sweet alert
 https://realrashid.github.io/sweet-alert/install
+
+# cpu monitor
+https://morioh.com/p/664d0e756ab1

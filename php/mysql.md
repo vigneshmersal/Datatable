@@ -5,6 +5,9 @@ https://www.apachefriends.org/download.html
 
 For multilanguage set `utf8_unicode_ci`
 
+## Monitor
+> SHOW PROCESSLIST
+
 ## Explain query
 > EXPLAIN select * from users
 
@@ -12,8 +15,36 @@ For multilanguage set `utf8_unicode_ci`
 
 ## comma seperated column values
 > SELECT GROUP_CONCAT(id)  FROM table_level where parent_id=4 group by parent_id;
+
 ## Star rating
 > SELECT SUM(rating = 1) AS one_s, SUM(rating = 2) AS two_s FROM star_ratings
+
+```php
+// single DB query to get conditional counts
+select
+  count(*) as total,
+  count(case when status = 'confirmed' then 1 end) as confirmed,
+  count(case when status = 'unconfirmed' then 1 end) as unconfirmed,
+from subscribers
+
+$totals = DB::table('subscribers')
+    ->selectRaw('count(*) as total')
+    ->selectRaw("count(case when status = 'confirmed' then 1 end) as confirmed")
+    ->selectRaw("count(case when status = 'unconfirmed' then 1 end) as unconfirmed")
+    ->first();
+
+// boolean column
+$totals = DB::table('subscribers')
+    ->selectRaw('count(*) as total')
+    ->selectRaw('count(is_admin or null) as admins')
+    ->first();
+
+// PostgreSQL
+$totals = DB::table('subscribers')
+    ->selectRaw('count(*) as total')
+    ->selectRaw('count(*) filter (where is_admin) as admins')
+    ->first();
+```
 
 ## foreign key
 > alter table comments add foreign key (post_id) references posts(id)

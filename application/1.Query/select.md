@@ -13,6 +13,58 @@ DB::table(function($query) {
 
 # Custom new field - Subquery Selects
 ```php
+# type 1
+class User extends Model
+{
+    // wrong
+    public function scopeWithLastLoginDate($query)
+    {
+        $query->addSelect(['last_login_at' => Login::select('created_at')
+            ->whereColumn('user_id', 'users.id')
+            ->latest()
+            ->take(1)
+        ])->withCasts(['last_login_at' => 'datetime']);
+    }
+
+    // wrong - $lastLogin = User::first()->lastLogin;
+    // select * from "logins" where "logins"."user_id" in (1, 2, 3...99, 100) order by "created_at" desc
+    public function lastLogin()
+    {
+        return $this->hasOne(Login::class)->latest();
+    }
+    // wrong - select * from "logins" where "logins"."user_id" in (1, 2, 3...99, 100 order by "created_at" desc limit 1
+    public function lastLogin()
+    {
+        return $this->hasOne(Login::class)->latest()->take(1);
+    }
+
+    // correct
+    public function lastLogin()
+    {
+        return $this->belongsTo(Login::class);
+    }
+
+    public function scopeWithLastLogin($query)
+    {
+        $query->addSelect(['last_login_id' => Login::select('id')
+            ->whereColumn('user_id', 'users.id')
+            ->latest()
+            ->take(1)
+        ])->with('lastLogin');
+    }
+
+    # Lazy-loading dynamic relationships
+    $lastLogin = User::first()->lastLogin; // will return null
+    protected static function booted()
+    {
+        static::addGlobalScope('with_last_login', function ($query) {
+            $query->withLastLogin();
+        });
+    }
+}
+```
+
+```php
 # 1.model cast
 $protected $casts = [ 'last_posted_at' => 'date' ];
 # 2. withcast
@@ -87,13 +139,13 @@ Builder::macro('addSubSelect', function ($column, $query) {
     return $this->selectSub($query->limit(1)->getQuery(), $column);
 });
 
-# more improvement
+# more improvement - dynamic relationship
 $customers = Customer::with('company')
     ->withLastInteraction()
     ->orderByName()
     ->paginate();
 
-public function lastInteraction() {
+public function lastInteraction() { 
     return $this->hasOne(Interaction::class, 'id', 'last_interaction_id');
 }
 
@@ -101,7 +153,7 @@ public function scopeWithLastInteraction($query) {
     $query->addSubSelect('last_interaction_id', Interaction::select('id')
         ->whereRaw('customer_id = customers.id')
         ->latest()
-    )->with('lastInteraction');
+    )->with('lastInteraction'); // ref last_interaction_id
 }
 
 <td>

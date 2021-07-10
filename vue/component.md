@@ -1,5 +1,8 @@
 # Component
 
+<!-- Dynamic component -->
+<component v-bind:is="page.component"></component>
+
 ```js
 Vue.component('my-component', {
 	components: { // components that can be used in the template

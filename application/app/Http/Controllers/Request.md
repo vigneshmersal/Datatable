@@ -4,7 +4,7 @@
 $requestHost = $request->header('route');
 $requestHost = $request->header('Host');
 'ip' => $request->getClientIp(),
-'url' => $request->getRequestUri(),
+'url' => Request::getRequestUri(),
 'agent' => $request->header('User-Agent'),
 ```
 
