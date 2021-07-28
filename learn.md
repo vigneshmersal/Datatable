@@ -1,7 +1,8 @@
 # Learn
+https://laravel-guide.readthedocs.io/en/latest/broadcasting/
 
-- database schema
-- lenovo vantage features
+https://github.com/alexeymezenin/laravel-best-practices/
+
 - laravel ignition error editor to sublime text
 - psr 4 code fixer (also - php cs fixer package)
 - how to use const variable inside trait of child
@@ -51,6 +52,8 @@
 ---
 
 ## Tutorials
+
+https://medium.com/@nathan_17070/building-an-api-response-time-database-in-laravel-b895ffe5932e
 
 ### Sites
 https://devdojo.com/t/laravel

@@ -12,6 +12,19 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 // php artisan make:resource UserCollection
 class PostCollection extends ResourceCollection
 {
+    /**
+     * The resource that this resource collects.
+     * Customizing Resource Class Path
+     * @var string
+     */
+    public $collects = 'App\Http\Resources\User';
+
+    protected $user;
+    public function __construct($resource, User $user = null) {
+        $this->user = $user;
+        parent::__construct($resource);
+    }
+
     // pass additional value
     // (new UserResourceCollection($user))->foo('bar');
     protected $foo;
@@ -22,16 +35,18 @@ class PostCollection extends ResourceCollection
     }
 
     public function toArray($request){
+        // $request->request->add(['foo' => 'foovalue']);
         return $this->collection->map(function(UserResource $resource) use($request){
+            // $resource->check = $resource->id;
             return $resource->foo($this->foo)->toArray($request);
     })->all();
 
-	/**
-     * The resource that this resource collects.
-     * Customizing Resource Class Path
-     * @var string
-     */
-    public $collects = 'App\Http\Resources\User';
+    // or use HigherOrderCollectionProxy
+    // return $this->collection->each->foo($this->foo)->map->toArray($request)->all()
+
+    // or simple
+    // $this->collection->each->foo($this->foo);
+    // return parent::toArray($request);
 
     /**
      * Transform the resource collection into an array.
@@ -42,9 +57,7 @@ class PostCollection extends ResourceCollection
     public function toArray($request)
     {
         return parent::toArray($request);
-
         // (or)
-
         return [
             'data' => $this->collection,
             'links' => [

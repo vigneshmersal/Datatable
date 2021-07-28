@@ -28,24 +28,20 @@ class User extends Model
 
     // wrong - $lastLogin = User::first()->lastLogin;
     // select * from "logins" where "logins"."user_id" in (1, 2, 3...99, 100) order by "created_at" desc
-    public function lastLogin()
-    {
+    public function lastLogin() {
         return $this->hasOne(Login::class)->latest();
     }
     // wrong - select * from "logins" where "logins"."user_id" in (1, 2, 3...99, 100 order by "created_at" desc limit 1
-    public function lastLogin()
-    {
+    public function lastLogin() {
         return $this->hasOne(Login::class)->latest()->take(1);
     }
 
     // correct
-    public function lastLogin()
-    {
+    public function lastLogin() {
         return $this->belongsTo(Login::class);
     }
 
-    public function scopeWithLastLogin($query)
-    {
+    public function scopeWithLastLogin($query) {
         $query->addSelect(['last_login_id' => Login::select('id')
             ->whereColumn('user_id', 'users.id')
             ->latest()
@@ -55,8 +51,7 @@ class User extends Model
 
     # Lazy-loading dynamic relationships
     $lastLogin = User::first()->lastLogin; // will return null
-    protected static function booted()
-    {
+    protected static function booted() {
         static::addGlobalScope('with_last_login', function ($query) {
             $query->withLastLogin();
         });

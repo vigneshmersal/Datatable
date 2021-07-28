@@ -21,3 +21,10 @@ foreach ($this->relations as $relationName => $values){
     $new->{$relationName}()->sync($values);
 }
 ```
+
+```php
+// Determine if there are any joins.
+if (count((array) $builder->getQuery()->joins) > 0)
+// or
+if ($this->hasJoins())
+```

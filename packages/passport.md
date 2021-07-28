@@ -1,6 +1,10 @@
 # API passport
 [laravel-json-api](https://laravel-json-api.readthedocs.io/en/latest/)
 
+## package
+cache token
+> https://github.com/overtrue/laravel-passport-cache-token
+
 Install
 > composer require laravel/passport
 > php artisan migrate
@@ -20,7 +24,9 @@ AuthServiceProvider.php
 ```php
 use Laravel\Passport\Passport;
 public function boot() {
-    Passport::routes();
+    if (!app()->runningInConsole()) {
+        Passport::routes();
+    }
 }
 ```
 

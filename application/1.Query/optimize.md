@@ -56,9 +56,11 @@ User::get()->pluck('name')->toArray(); // less column
 ```
 
 ## cache query
+CACHE_DRIVER=redis , default port (6379)
+> composer require predis/predis
+
 ```php
-$cacheKey = md5(vsprintf('%s.%s', [$user->id,$days]))
-Cache::remember('index.posts', $seconds = 30, function() { // time - 60*60*24
+$results = Cache::remember($cacheKey, now()->addHours(24), function() use ($user) {
     return Post::all(['id', 'name']);
     return Post::with(['user:id,name', 'comments'])->get()->map(function($post) {
         return [
@@ -68,9 +70,36 @@ Cache::remember('index.posts', $seconds = 30, function() { // time - 60*60*24
     })->toArray(); // toArray() - store data's only
 }); // use blade files as array format
 Cache::forget('index.posts'); // php artisan cache:clear
+
+$results = Cache::remember($cacheKey, now()->addHours(24), function() use ($user) {
+    $results = DB::table('tasks')->select(DB::raw('COUNT(*) as total, DATE(created_at) as date'))
+        ->where('user_id', $user->id)->groupBy('date')->orderBy('date', 'asc')->get();
+    // Simulate expensive processing
+    foreach ($results as $item) usleep(5000);
+    return $results;
+});
 ```
 
-# with condition - solve n+1 query issue
+## Queue
+For mail
+> SendEmailJob::dispatch($to, $body);
+
+## Assets
+    mix.js('resources/js/app.js', 'public/js').sass('resources/sass/app.scss', 'public/css');
+> npm run production
+
+## Vendor Extraction
+> mix.js('resources/js/app.js', 'public/js').extract(['vue', 'lodash']);
+    public/js/manifest.js – The Webpack manifest runtime
+    public/js/vendor.js – Your vendor libraries
+    public/js/app.js – Your application code
+
+## Cache Busting
+> mix.js('resources/js/app.js', 'public/js');
+> if (mix.inProduction()) { mix.version(); }
+
+## with condition - solve n+1 query issue
+
 ```php
 Post::with('user')->get(); // instead of Post::all()
 Hotel::with('city')->withCount(['bookings'])->get(); // bookings_count

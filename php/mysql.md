@@ -75,7 +75,6 @@ COMMIT;
 ## length
 > CHAR_LENGTH('column')
 
-
 ## import to windows
 C:/xampp/mysql/bin > mysql.exe -u root -p `database_name` < `path/file.sql`
 example:
@@ -160,7 +159,7 @@ Location: `C:\Windows\System32\drivers\etc\hosts`
 ```
 
 ## vHost
-Location: `C:/xampp/apache/conf/extra/httpd-vhosts.conf`
+Location: C:/xampp/apache/conf/extra/httpd-vhosts.conf
 
 ```php
 <VirtualHost dev.guidely.test:80>
@@ -171,7 +170,7 @@ Location: `C:/xampp/apache/conf/extra/httpd-vhosts.conf`
        AllowOverride All
        Order allow,deny
        Allow from all
-       Require all granted
+       // Require all granted - uncommand this line
    </Directory>
 </VirtualHost>
 ```
@@ -179,9 +178,9 @@ Location: `C:/xampp/apache/conf/extra/httpd-vhosts.conf`
 # Xampp
 
 ## change Apache port {#apache}
-After `Xampp -> config -> Service & Port settings -> set port -> save`
+After Xampp -> config -> Service & Port settings -> set port -> save
 Restart xampp
-visit `localhost:8080`
+visit localhost:8080
 
 ```php
 Location: C:\xampp\apache\conf\httpd\httpd.conf
@@ -210,6 +209,7 @@ port=8111
 
 ## Error: MySQL shutdown unexpectedly.
 https://stackoverflow.com/questions/18022809/xampp-mysql-shutdown-unexpectedly
+
 ```php
 my.ini -> 3- change client port and server port - 4000
 
@@ -221,3 +221,15 @@ If your XAMPP Control Panes is active close it.
 Go to C:\xampp and find xampp-control, run it.
 Start Apache, start MySQL.
 ```
+
+## Table Index
+Index - userid, created_at, total
+select column `total` also indexing is best practice
+> select sum(total) from users where userid=1 and between '2020-01-01 00:00:00' and '2020-12-31 59:59:59'
+
+Index - firstname
+Here Query optimizer automatically choose the index column(firstname) first - fast
+> select * from users where birthday='2021-01-01' and fistname='vignesh'
+
+compound Index - lastname, firstname - fast
+> select * from users lastname='bsdub' and firstname='sdgyu'

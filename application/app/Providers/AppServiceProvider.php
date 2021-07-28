@@ -27,8 +27,8 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(Contract::class, Service::class);
 
-        $this->app->bind(OtherContract::class, function ($app) {
-            return new OtherService($app);
+        $this->app->bind(ReportServiceInterface::class, function () {
+            return new ReportService();
         });
 
         if ($this->app->environment() == 'local') {

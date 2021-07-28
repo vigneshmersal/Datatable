@@ -44,6 +44,20 @@ class User extends JsonResource
         return $this;
     }
 
+    private $foo;
+    // return new PostResource($post, 'my variable');
+    public function __construct($resource, $foo)
+    {
+        // Ensure you call the parent constructor
+        parent::__construct($resource);
+        $this->resource = $resource;
+        $this->foo = $foo;
+    }
+
+    public static function collection($resource){
+        return new UserResourceCollection($resource);
+    }
+
 	/**
 	* Transform the resource into an array.
 	*
