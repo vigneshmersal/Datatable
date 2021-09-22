@@ -33,6 +33,7 @@ class PackageRequest extends FormRequest
     public function rules(Request $request)
     {
         $city = $this->get('city_id');
+        $employeeId = $this->request->get('employee_id');
         $types = implode(',', Cab::pluck('type')->toArray());
         $id = $this->route('bookingId');
 
@@ -40,6 +41,12 @@ class PackageRequest extends FormRequest
         {
             return [
                 'package_name' => 'required|string|max:255|unique:packages',
+                'type' => 'required|'. 
+                    (
+                        ($this->method() == "POST") 
+                            ? 'unique:cab_types' 
+                            : 'unique:cab_types,cab_type,' . array_values($this->route()->parameters())[0] . ',id'
+                    ),
             ];
         }
         else // PATCH
@@ -70,6 +77,15 @@ class PackageRequest extends FormRequest
             'title.required' => 'A title is required',
             'city_id.in' => 'Selected City is Invalid',
             'booking_id.exists' => 'Selected Booking Id is Invalid',
+            'after_or_equal' => 'The :attribute must be greater than or equal to purchase date.',
+            'before_or_equal' => 'The :attribute must be less than or equal to today.',
+            'field.*.id.exists' => 'Some.',
+            'address.max'  => 'Address May Not be Greater Than 255 Characters',
+            'lat.numeric'  => 'Lat Must be a Number',
+            'password.confirmed'  => 'Password Confirmation does not Match',
+            'pick_up_suburb_id.required_if' => 'Pick Up Suburb is required',
+            'type.*.distinct' => 'The type field has a duplicate value.',
+            'type.*.min' => 'The type must be at least :min.',
         ];
     }
 
@@ -83,7 +99,12 @@ class PackageRequest extends FormRequest
         return [
             'phone' => 'mobile',
             'drop_date_time' => 'expected drop date & time',
+            'code.*' => 'code',
         ];
+        // or
+        $attributes = parent::attributes();
+        $attributes['owner_id'] = 'owner';
+        return $attributes;
     }
 
     /**
@@ -110,6 +131,7 @@ class PackageRequest extends FormRequest
         $data['package'] = PACKAGE_TYPE_SLUG_MAP[$data['package_type_slug']];
         $this->cityId = $data['city_id'];
         unset($data['rental_fare_id'], $data['outstation_package_slot_id']);
+        unset($data['outstation_city'][0]);
         return $data;
 
         // or
@@ -142,5 +164,13 @@ class PackageRequest extends FormRequest
     public function response(array $errors)
     {
         return response()->json(['error' => $errors['cab_number']], 422);
+        
+        // or
+        
+        if ($this->expectsJson()) {
+            return new JsonResponse(['message' => 'validation failed', 'error' => $errors], 422);
+        }
+
+        return parent::response($errors);
     }
 }

@@ -181,6 +181,7 @@ $var = [
 	# Regular expression
 	'regex:pattern', // check matching
 	'not_regex:pattern', // check not matching
+	'rating' => 'regex:(^([0-5]\d*)(?:\\.[05]0?)?$)',
 ]
 ```
 
@@ -201,7 +202,7 @@ Rule::requiredIf(function () use ($request) { return true; }),
 'required_unless:anotherfield,value',
 
 # required with & with_all & without & without_all
-'required_with:foo,bar,...', // present & not empty -only- if any other fields are  present
+'required_with:foo,bar,...', // present & not empty -only- if any other fields are present
 'required_with_all:foo,bar,...',
 'required_without:foo,bar,...',
 'required_without_all:foo,bar,...',
