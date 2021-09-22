@@ -218,8 +218,9 @@ Rule::requiredIf(function () use ($request) { return true; }),
 $var = [
 	# unique
 	'field' => 'unique:table',
-	'field' => 'unique:table,column,ignoreId,idColumn',
-	'field' => 'unique:App\Model,column,ignoreId,idColumn',
+	'field' => 'unique:table,column,ignoreId,id',
+	'field' => 'unique:App\Model,column,ignoreId,id',
+	'field' => 'unique:table,column,ignoreId,id,deleted_at,NULL', // with condition
 	'field' => Rule::unique('table')->ignore($user->id),
 	'field' => Rule::unique('table', 'column')->ignore($user),
 	'field' => Rule::unique('table')->where(function ($q) { return $q->where('column', 'val'); }),
@@ -228,7 +229,9 @@ $var = [
 	'field' => 'exists:table',
 	'field' => 'exists:table,column', // using custom column
 	'field' => 'exists:App\Model,column', //  using model
+	'field' => 'exists:table,column,deleted_at,NULL,city_id,1', // with condition
 	'field' => Rule::exists('table')->where(function ($query) { $query->where('column', 'val'); }),
+	'field' => Rule::exists('table', 'customColumnName'),
 ];
 ```
 
@@ -237,7 +240,7 @@ $var = [
 'name'   => 'required|string|max:255|unique:users',
 'email'  => 'email',
 
-'mobile' => 'required|digits:10',
+'mobile' => 'required|numeric|digits:10',
 'mobile' => 'required|numeric|between:9,11',
 'mobile' => 'required|min:10|numeric',
 'mobile' => 'required|regex:/(01)[0-9]{9}/',
