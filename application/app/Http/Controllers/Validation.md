@@ -182,6 +182,12 @@ $var = [
 	'regex:pattern', // check matching
 	'not_regex:pattern', // check not matching
 	'rating' => 'regex:(^([0-5]\d*)(?:\\.[05]0?)?$)',
+	'mobile' => 'required|regex:/(01)[0-9]{9}/',
+	'mobile' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
+	'password' => 'regex:/^(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/', // sPassword must contain 1 number and 1 special character
+	'pan_number' => 'regex:(^([A-Z]){5}([0-9]){4}([A-Z]){1}?$)',
+	'regex:/^\d+(\.\d{1,2})?$/',
+	'regex:/^\d+(\.[0-5][0-9])?$/',
 ]
 ```
 

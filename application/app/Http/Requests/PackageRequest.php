@@ -36,6 +36,8 @@ class PackageRequest extends FormRequest
         $employeeId = $this->request->get('employee_id');
         $types = implode(',', Cab::pluck('type')->toArray());
         $id = $this->route('bookingId');
+        $required = $this->route()->methods()[0] == 'POST' ?  '' : 'required|';
+        $validFrom = $this->all()['valid_from'];
 
         if ($this->method() == "POST")
         {
@@ -73,6 +75,11 @@ class PackageRequest extends FormRequest
     {
         $cabNumber = $this->request->get('cab_number');
 
+        $message = null;
+        if ($this->input('message')) {  
+            $message = 'The due date must be greater than now';
+        }
+
         return [
             'title.required' => 'A title is required',
             'city_id.in' => 'Selected City is Invalid',
@@ -86,6 +93,7 @@ class PackageRequest extends FormRequest
             'pick_up_suburb_id.required_if' => 'Pick Up Suburb is required',
             'type.*.distinct' => 'The type field has a duplicate value.',
             'type.*.min' => 'The type must be at least :min.',
+            'message' => $message,
         ];
     }
 
@@ -158,11 +166,18 @@ class PackageRequest extends FormRequest
     /**
      * Get the proper failed validation response for the request.
      *
-     * @param  array $errors
+     * @param  array     $errors
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function response(array $errors)
     {
+        $newErrorBag = [];
+        foreach ($errors as $key => $value) {
+            foreach ($value as $messages) {
+                $newErrorBag[$key][] = $messages->getMessages()['message'];
+            }
+        }
+        
         return response()->json(['error' => $errors['cab_number']], 422);
         
         // or
